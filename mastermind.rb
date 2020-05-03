@@ -1,4 +1,5 @@
 require 'colorize'
+require 'pry'
 
 class Mastermind
   COLORS = [:black, :blue, :green, :magenta, :red, :light_yellow, :light_black]
@@ -20,7 +21,14 @@ class Mastermind
     self.generate_code
     begin
       self.play_round
-    end until @round == NUMBER_OF_ROUNDS
+    end until (@round == NUMBER_OF_ROUNDS) || self.win?
+    if self.win?
+      puts "Congratulations you won !"
+    else
+      puts "Better luck next time !"
+    end
+    puts "The code was:"
+    puts display_pegs(@code)
   end
 
   private
@@ -30,17 +38,29 @@ class Mastermind
     CODE_LENGTH.times { @code << COLORS[rand(1..COLORS.length-1)] }
   end
 
-  def display_line(line)
+  def win?
+    @results[@round-1][:correct_position] == CODE_LENGTH
+  end
+
+  def display_pegs(line)
+    display = ''
     line.each do |peg|
-      print "| #{"O".colorize(peg)} "
+      display += "| #{"O".colorize(peg)} "
     end
-    puts "|"
+    display += "|"
+  end
+
+  def display_result(result)
+    "#{result[:correct_position].to_s.green} " +
+      "#{result[:incorrect_position].to_s.red}"
   end
 
   def display
     3.times { puts }
     puts LINE_SEPARATOR
-    @guesses.each { |line| display_line(line)}
+    NUMBER_OF_ROUNDS.times do |i|
+      puts display_pegs(@guesses[i]) + display_result(@results[i])
+    end
     puts LINE_SEPARATOR
   end
 
@@ -59,7 +79,7 @@ class Mastermind
           guess[i] = gets.chomp.to_sym
         end until COLORS[1..-1].any? { |valid_color| guess[i] == valid_color}
       end
-      display_line(guess)
+      puts display_pegs(guess)
       puts "Are you happy with your choice ?"
       confirm = gets.chomp
     end until confirm == "yes"
@@ -71,7 +91,7 @@ class Mastermind
     guess = @guesses[@round].dup
     code = @code.dup
     CODE_LENGTH.times do |i|
-      if guess[i] = code[i]
+      if guess[i] == code[i]
         result[:correct_position] += 1
         guess[i] = code[i] = COLORS[0]
       end
@@ -81,7 +101,7 @@ class Mastermind
         if (code[code_index] != COLORS[0]) && 
            (code[code_index] == guess[guess_index])
           result[:incorrect_position] += 1
-          guess[i] = code[i] = COLORS[O]
+          guess[guess_index] = code[code_index] = COLORS[0]
         end
       end
     end
