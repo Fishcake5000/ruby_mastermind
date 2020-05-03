@@ -8,9 +8,11 @@ class Mastermind
 
   def initialize
     @guesses = []
+    @results = []
     @round = 0
     NUMBER_OF_ROUNDS.times do
       @guesses << Array.new(CODE_LENGTH, COLORS[0])
+      @results << {}
     end
   end
 
@@ -64,9 +66,32 @@ class Mastermind
     guess
   end
 
+  def check_guess
+    result = {correct_position: 0, incorrect_position: 0}
+    guess = @guesses[@round].dup
+    code = @code.dup
+    CODE_LENGTH.times do |i|
+      if guess[i] = code[i]
+        result[:correct_position] += 1
+        guess[i] = code[i] = COLORS[0]
+      end
+    end
+    CODE_LENGTH.times do |code_index|
+      CODE_LENGTH.times do |guess_index|
+        if (code[code_index] != COLORS[0]) && 
+           (code[code_index] == guess[guess_index])
+          result[:incorrect_position] += 1
+          guess[i] = code[i] = COLORS[O]
+        end
+      end
+    end
+    result
+  end
+
   def play_round
     self.display
     @guesses[@round] = self.get_guess
+    @results[@round] = self.check_guess
     @round += 1
   end
 end
