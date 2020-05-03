@@ -37,8 +37,8 @@ class Mastermind
     self.get_code
     begin
       self.play_round_as_computer
+      gets
     end until (@round == NUMBER_OF_ROUNDS) || self.win?
-    self.display
     if self.win?
       puts "The computer won ! Better luck next time"
     else
@@ -88,14 +88,14 @@ class Mastermind
   end
 
   def display
-    3.times { puts }
+    10.times { puts }
     puts " " * 4 + LINE_SEPARATOR
     NUMBER_OF_ROUNDS.times do |i|
       puts " " * 4 + display_pegs(@guesses[i]) +
            " " * 4 + display_result(@results[i])
     end
     puts " " * 4 + LINE_SEPARATOR
-    3.times { puts }
+    2.times { puts }
   end
 
   def get_selection
@@ -112,7 +112,7 @@ class Mastermind
       puts display_pegs(selection)
       puts "Are you happy with your choice ?"
       confirm = gets.chomp
-    end until confirm == "yes"
+    end until confirm == "yes" || confirm == "y"
     selection
   end
 
@@ -154,6 +154,7 @@ class Mastermind
   def play_round_as_computer
     @guesses[@round] = self.generate_random_guess
     @results[@round] = self.calculate_result
+    self.display
     @round += 1
   end
 end
