@@ -42,6 +42,12 @@ class Mastermind
     @results[@round-1][:correct_position] == CODE_LENGTH
   end
 
+  def valid_guess?(guess)
+    (guess.size == CODE_LENGTH) && guess.all? do |guess_color|
+      COLORS[1..-1].any? { |valid_color| guess_color == valid_color}
+    end
+  end
+
   def display_pegs(line)
     display = ''
     line.each do |peg|
@@ -72,13 +78,10 @@ class Mastermind
         print "#{valid_color.to_s.colorize(valid_color)}, "
       end
       puts
-      CODE_LENGTH.times do |i|
-        guess << COLORS[0]
-        begin
-          puts "Enter colour n° #{i+1}"
-          guess[i] = gets.chomp.to_sym
-        end until COLORS[1..-1].any? { |valid_color| guess[i] == valid_color}
-      end
+      begin
+        puts "Enter #{CODE_LENGTH} colours separated by spaces"
+        guess = gets.chomp.split.map { |color| color.to_sym}
+      end until self.valid_guess?(guess)
       puts display_pegs(guess)
       puts "Are you happy with your choice ?"
       confirm = gets.chomp
