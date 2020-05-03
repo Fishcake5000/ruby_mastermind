@@ -17,10 +17,11 @@ class Mastermind
     end
   end
 
-  def play
+  def play_as_human
+    self.initialize
     self.generate_code
     begin
-      self.play_round
+      self.play_round_as_human
     end until (@round == NUMBER_OF_ROUNDS) || self.win?
     if self.win?
       puts "Congratulations you won !"
@@ -31,20 +32,45 @@ class Mastermind
     puts display_pegs(@code)
   end
 
+  def play_as_computer
+    self.initialize
+    self.get_code
+    begin
+      self.play_round_as_computer
+    end until (@round == NUMBER_OF_ROUNDS) || self.win?
+    self.display
+    if self.win?
+      puts "The computer won ! Better luck next time"
+    else
+      puts "Congratulations ! The computer lost"
+    end
+    puts "The code was:"
+    puts display_pegs(@code)
+  end
+
   private
+
+  def random_color
+    COLORS[rand(1..COLORS.length-1)]
+  end
 
   def generate_code
     @code = []
-    CODE_LENGTH.times { @code << COLORS[rand(1..COLORS.length-1)] }
+    CODE_LENGTH.times { @code << self.random_color }
+  end
+
+  def get_code
+    puts "Please select your code"
+    @code = self.get_selection
   end
 
   def win?
     @results[@round-1][:correct_position] == CODE_LENGTH
   end
 
-  def valid_guess?(guess)
-    (guess.size == CODE_LENGTH) && guess.all? do |guess_color|
-      COLORS[1..-1].any? { |valid_color| guess_color == valid_color}
+  def valid_selection?(selection)
+    (selection.size == CODE_LENGTH) && selection.all? do |selected_color|
+      COLORS[1..-1].any? { |valid_color| selected_color == valid_color}
     end
   end
 
@@ -63,33 +89,34 @@ class Mastermind
 
   def display
     3.times { puts }
-    puts LINE_SEPARATOR
+    puts " " * 4 + LINE_SEPARATOR
     NUMBER_OF_ROUNDS.times do |i|
-      puts display_pegs(@guesses[i]) + display_result(@results[i])
+      puts " " * 4 + display_pegs(@guesses[i]) +
+           " " * 4 + display_result(@results[i])
     end
-    puts LINE_SEPARATOR
+    puts " " * 4 + LINE_SEPARATOR
+    3.times { puts }
   end
 
-  def get_guess
+  def get_selection
     begin
-      guess = []
-      puts "Enter your guess, valid colours are :"
+      puts "Enter your selection, valid colours are :"
       COLORS[1..-1].each do |valid_color|
         print "#{valid_color.to_s.colorize(valid_color)}, "
       end
       puts
       begin
         puts "Enter #{CODE_LENGTH} colours separated by spaces"
-        guess = gets.chomp.split.map { |color| color.to_sym}
-      end until self.valid_guess?(guess)
-      puts display_pegs(guess)
+        selection = gets.chomp.split.map { |color| color.to_sym}
+      end until self.valid_selection?(selection)
+      puts display_pegs(selection)
       puts "Are you happy with your choice ?"
       confirm = gets.chomp
     end until confirm == "yes"
-    guess
+    selection
   end
 
-  def check_guess
+  def calculate_result
     result = {correct_position: 0, incorrect_position: 0}
     guess = @guesses[@round].dup
     code = @code.dup
@@ -111,13 +138,25 @@ class Mastermind
     result
   end
 
-  def play_round
+  def play_round_as_human
     self.display
-    @guesses[@round] = self.get_guess
-    @results[@round] = self.check_guess
+    @guesses[@round] = self.get_selection
+    @results[@round] = self.calculate_result
+    @round += 1
+  end
+
+  def generate_random_guess
+    guess = []
+    CODE_LENGTH.times { guess << self.random_color }
+    guess
+  end
+
+  def play_round_as_computer
+    @guesses[@round] = self.generate_random_guess
+    @results[@round] = self.calculate_result
     @round += 1
   end
 end
 
 new_game = Mastermind.new
-new_game.play
+new_game.play_as_computer
