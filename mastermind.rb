@@ -8,12 +8,12 @@ class Mastermind
   NUMBER_OF_ROUNDS = 12
 
   def initialize
-    @guesses = []
-    @results = []
+    @board = []
     @round = 0
     NUMBER_OF_ROUNDS.times do
-      @guesses << Array.new(CODE_LENGTH, COLORS[0])
-      @results << {}
+      empty_pegs = Array.new(CODE_LENGTH, COLORS[0])
+      empty_result = {}
+      @board << {guess: empty_pegs, result: empty_result}
     end
   end
 
@@ -65,7 +65,7 @@ class Mastermind
   end
 
   def win?
-    @results[@round-1][:correct_position] == CODE_LENGTH
+    @board[@round-1][:result][:correct_position] == CODE_LENGTH
   end
 
   def valid_selection?(selection)
@@ -91,8 +91,8 @@ class Mastermind
     10.times { puts }
     puts " " * 4 + LINE_SEPARATOR
     NUMBER_OF_ROUNDS.times do |i|
-      puts " " * 4 + display_pegs(@guesses[i]) +
-           " " * 4 + display_result(@results[i])
+      puts " " * 4 + display_pegs(@board[i][:guess]) +
+           " " * 4 + display_result(@board[i][:result])
     end
     puts " " * 4 + LINE_SEPARATOR
     2.times { puts }
@@ -118,7 +118,7 @@ class Mastermind
 
   def calculate_result
     result = {correct_position: 0, incorrect_position: 0}
-    guess = @guesses[@round].dup
+    guess = @board[@round][:guess].dup
     code = @code.dup
     CODE_LENGTH.times do |i|
       if guess[i] == code[i]
@@ -140,8 +140,8 @@ class Mastermind
 
   def play_round_as_human
     self.display
-    @guesses[@round] = self.get_selection
-    @results[@round] = self.calculate_result
+    @board[@round][:guess] = self.get_selection
+    @board[@round][:result] = self.calculate_result
     @round += 1
   end
 
@@ -152,8 +152,8 @@ class Mastermind
   end
 
   def play_round_as_computer
-    @guesses[@round] = self.generate_random_guess
-    @results[@round] = self.calculate_result
+    @board[@round][:guess] = self.generate_random_guess
+    @board[@round][:result] = self.calculate_result
     self.display
     @round += 1
   end
