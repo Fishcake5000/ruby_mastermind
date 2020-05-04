@@ -88,13 +88,15 @@ class Mastermind
       "#{result[:incorrect_position].to_s.red}"
   end
 
+  def display_line(line)
+    " " * 4 + display_pegs(line[:guess]) + 
+    " " * 4 + display_result(line[:result])
+  end
+
   def display
     10.times { puts }
     puts " " * 4 + LINE_SEPARATOR
-    NUMBER_OF_ROUNDS.times do |i|
-      puts " " * 4 + display_pegs(@board[i][:guess]) +
-           " " * 4 + display_result(@board[i][:result])
-    end
+    @board.each { |line| puts display_line(line) }
     puts " " * 4 + LINE_SEPARATOR
     2.times { puts }
   end
@@ -139,10 +141,15 @@ class Mastermind
     result
   end
 
+  def enter_new_guess(guess)
+    @board[@round][:guess] = guess
+    @board[@round][:result] = self.calculate_result(guess, @code)
+  end
+    
+
   def play_round_as_human
     self.display
-    @board[@round][:guess] = self.get_selection
-    @board[@round][:result] = self.calculate_result(@board[@round][:guess], @code)
+    self.enter_new_guess(get_selection)
     @round += 1
   end
 
@@ -155,10 +162,9 @@ class Mastermind
   def play_round_as_computer
     guess = self.generate_random_pegs
     until @round == 0 || self.possible_guess?(guess)
-      guess = self.generate_random_guess
+      guess = self.generate_random_pegs
     end
-    @board[@round][:guess] = guess
-    @board[@round][:result] = self.calculate_result(@board[@round][:guess], @code)
+    self.enter_new_guess(guess)
     self.display
     @round += 1
   end
