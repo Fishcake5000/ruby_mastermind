@@ -116,10 +116,10 @@ class Mastermind
     selection
   end
 
-  def calculate_result
+  def calculate_result(guess, code)
     result = {correct_position: 0, incorrect_position: 0}
-    guess = @board[@round][:guess].dup
-    code = @code.dup
+    guess = guess.dup
+    code = code.dup
     CODE_LENGTH.times do |i|
       if guess[i] == code[i]
         result[:correct_position] += 1
@@ -141,7 +141,7 @@ class Mastermind
   def play_round_as_human
     self.display
     @board[@round][:guess] = self.get_selection
-    @board[@round][:result] = self.calculate_result
+    @board[@round][:result] = self.calculate_result(@board[@round][:guess], @code)
     @round += 1
   end
 
@@ -151,9 +151,19 @@ class Mastermind
     guess
   end
 
+  def possible_guess?(guess)
+    @board[0..@round-1].all? do |prev_round|
+      self.calculate_result(prev_round[:guess], guess) == prev_round[:result]
+    end
+  end
+
   def play_round_as_computer
-    @board[@round][:guess] = self.generate_random_guess
-    @board[@round][:result] = self.calculate_result
+    guess = self.generate_random_guess
+    until @round == 0 || self.possible_guess?(guess)
+      guess = self.generate_random_guess
+    end
+    @board[@round][:guess] = guess
+    @board[@round][:result] = self.calculate_result(@board[@round][:guess], @code)
     self.display
     @round += 1
   end
