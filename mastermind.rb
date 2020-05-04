@@ -19,7 +19,7 @@ class Mastermind
 
   def play_as_human
     self.initialize
-    self.generate_code
+    @code = self.generate_random_pegs
     begin
       self.play_round_as_human
     end until (@round == NUMBER_OF_ROUNDS) || self.win?
@@ -34,7 +34,7 @@ class Mastermind
 
   def play_as_computer
     self.initialize
-    self.get_code
+    @code = self.get_code
     begin
       self.play_round_as_computer
       gets
@@ -54,14 +54,15 @@ class Mastermind
     COLORS[rand(1..COLORS.length-1)]
   end
 
-  def generate_code
-    @code = []
-    CODE_LENGTH.times { @code << self.random_color }
+  def generate_random_pegs
+    pegs = []
+    CODE_LENGTH.times { pegs << self.random_color }
+    pegs
   end
 
   def get_code
     puts "Please select your code"
-    @code = self.get_selection
+    self.get_selection
   end
 
   def win?
@@ -145,12 +146,6 @@ class Mastermind
     @round += 1
   end
 
-  def generate_random_guess
-    guess = []
-    CODE_LENGTH.times { guess << self.random_color }
-    guess
-  end
-
   def possible_guess?(guess)
     @board[0..@round-1].all? do |prev_round|
       self.calculate_result(prev_round[:guess], guess) == prev_round[:result]
@@ -158,7 +153,7 @@ class Mastermind
   end
 
   def play_round_as_computer
-    guess = self.generate_random_guess
+    guess = self.generate_random_pegs
     until @round == 0 || self.possible_guess?(guess)
       guess = self.generate_random_guess
     end
