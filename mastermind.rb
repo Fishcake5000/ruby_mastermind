@@ -170,4 +170,10 @@ class Mastermind
 end
 
 new_game = Mastermind.new
-new_game.play_as_computer
+begin
+  puts "Enter '1' to play Mastermind, '2' to play against the computer, " + 
+       "or 'quit' to exit"
+  user_input = gets.chomp
+  new_game.play_as_human if user_input == "1"
+  new_game.play_as_computer if user_input == "2"
+end until  user_input == "quit" || user_input == "q"
